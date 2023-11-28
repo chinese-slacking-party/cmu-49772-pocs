@@ -1,35 +1,12 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"log"
 	"os"
-	"time"
 
-	"github.com/go-resty/resty/v2"
+	repl "github.com/replicate/replicate-go"
 )
-
-type ReplicateURLs struct {
-	Cancel string `json:"cancel"`
-	Get    string `json:"get"`
-}
-
-type ReplicateStableDiffusionResponse struct {
-	ID     string          `json:"id"`
-	Input  json.RawMessage `json:"input"`
-	Output []string        `json:"output"`
-	Status string          `json:"status"`
-	URLs   ReplicateURLs   `json:"urls"`
-
-	CompletedAt time.Time       `json:"completed_at"`
-	CreatedAt   time.Time       `json:"created_at"`
-	StartedAt   time.Time       `json:"started_at"`
-	Error       json.RawMessage `json:"error"`
-	Logs        string          `json:"logs"`
-	Metrics     interface{}     `json:"metrics"`
-	Version     string          `json:"version"`
-}
 
 const (
 	apiEndpoint = "https://api.replicate.com/v1/predictions"
@@ -42,54 +19,44 @@ func main() {
 		log.Fatal("Please set the REPLICATE_API_TOKEN environment variable.")
 	}
 
-	// Create a new Resty client.
-	client := resty.New()
-
-	// Set the OpenAI API key as a header.
-	client.SetHeader("Authorization", fmt.Sprintf("Token %s", replicateToken))
-
-	// Create a new request object.
-	req := client.R().
-		SetBody(map[string]interface{}{
-			// Interesting. They use only "version" to identify a model, without
-			// project name ("naklecha/fashion-ai" in this case)
-			"version": "4e7916cc6ca0fe2e0e414c32033a378ff5d8879f209b1df30e824d6779403826",
-			"input": map[string]interface{}{
-				"prompt": "An Asian boy celebrating Halloween",
-			},
-		}).
-		SetHeader("Content-Type", "application/json")
-
-	// Send the request and get the response.
-	resp, err := req.Post(apiEndpoint)
+	client, err := repl.NewClient(repl.WithToken(replicateToken))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Decode the JSON response.
-	var respBody ReplicateStableDiffusionResponse
-	//log.Print(string(resp.Body()))
-	err = json.Unmarshal(resp.Body(), &respBody)
+	prediction, err := client.CreatePrediction(
+		context.TODO(),
+		// naklecha/fashion-ai as of 2023-11-28
+		"4e7916cc6ca0fe2e0e414c32033a378ff5d8879f209b1df30e824d6779403826",
+		repl.PredictionInput{
+			//
+		},
+		nil,  // We'll just use Wait() even if webhook is better for a backend solution
+		true, // Streaming - we're not yet using it but no harm to set the bit
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Working... Cancel at", respBody.URLs.Cancel)
+	log.Printf("The prediction is %+v", prediction)
 
-	// Get the result in a loop.
-	for respBody.Status != "succeeded" {
-		time.Sleep(500 * time.Millisecond)
-		resp, err := client.R().Get(respBody.URLs.Get)
-		if err != nil {
-			log.Fatal(err)
+	//timer := time.NewTicker(2 * time.Second)
+	//defer timer.Stop()
+	predFinish, predError := client.WaitAsync(context.TODO(), prediction)
+	for predFinish != nil || predError != nil {
+		select {
+		case pred, ok := <-predFinish:
+			if !ok {
+				// TODO here
+				predFinish = nil
+			}
+		case err, ok := <-predError:
+			if !ok {
+				predError = nil
+			}
 		}
-		respBody = ReplicateStableDiffusionResponse{}
-		err = json.Unmarshal(resp.Body(), &respBody)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Print(respBody.Logs)
+		//if predFinish == nil && predError == nil {
+		//	break
+		//}
 	}
-
-	// Print the generated text.
-	fmt.Println("Done! Get the image at", respBody.Output[0])
+	log.Print("Prediction complete!")
 }
