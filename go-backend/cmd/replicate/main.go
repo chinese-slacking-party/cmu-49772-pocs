@@ -51,7 +51,9 @@ func main() {
 	// Create a new request object.
 	req := client.R().
 		SetBody(map[string]interface{}{
-			"version": "ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4",
+			// Interesting. They use only "version" to identify a model, without
+			// project name ("naklecha/fashion-ai" in this case)
+			"version": "4e7916cc6ca0fe2e0e414c32033a378ff5d8879f209b1df30e824d6779403826",
 			"input": map[string]interface{}{
 				"prompt": "An Asian boy celebrating Halloween",
 			},
