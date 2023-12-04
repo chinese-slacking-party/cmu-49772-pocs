@@ -28,7 +28,7 @@ func main() {
 		"dtt-game-large",
 		repl.PredictionInput{
 			"image":  "http://4.205.58.200/api/v1/files/test/somefile.jpg",
-			"prompt": "a person wearing Minnie Mouse",
+			"prompt": "a person wearing Hufflepuff costumes, with a plain yellow background and a badger in the middle",
 		},
 		nil,   // We'll just use Wait() even if webhook is better for a backend solution
 		false, // Streaming not supported by this model
@@ -42,9 +42,27 @@ func main() {
 	for predFinish != nil || predError != nil {
 		select {
 		case pred, ok := <-predFinish:
-			log.Print(mustMarshalJSONString(pred))
 			if !ok {
 				predFinish = nil
+				break
+			}
+			if pred == nil {
+				continue
+			}
+			switch pred.Status {
+			case repl.Starting:
+				log.Println("Starting prediction...")
+			case repl.Processing:
+				progress := pred.Progress()
+				if progress == nil {
+					log.Println("Progress not yet available")
+					continue
+				}
+				log.Println("Progress:", progress.Percentage)
+			case repl.Succeeded:
+				log.Print(pred.Output.([]interface{})[3])
+			default:
+				panic(pred)
 			}
 		case err, ok := <-predError:
 			if err != nil {
