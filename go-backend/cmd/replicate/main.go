@@ -8,10 +8,6 @@ import (
 	repl "github.com/replicate/replicate-go"
 )
 
-const (
-	apiEndpoint = "https://api.replicate.com/v1/predictions"
-)
-
 func main() {
 	// Set the OpenAI API key as an environment variable.
 	replicateToken := os.Getenv("REPLICATE_API_TOKEN")
@@ -40,8 +36,6 @@ func main() {
 	}
 	log.Printf("The prediction is %+v", prediction)
 
-	//timer := time.NewTicker(2 * time.Second)
-	//defer timer.Stop()
 	predFinish, predError := client.WaitAsync(context.TODO(), prediction)
 	for predFinish != nil || predError != nil {
 		select {
