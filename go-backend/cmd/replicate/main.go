@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"os"
 
@@ -20,13 +21,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	prediction, err := client.CreatePrediction(
+	prediction, err := client.CreatePredictionWithDeployment(
 		context.TODO(),
 		// naklecha/fashion-ai as of 2023-11-28
-		"4e7916cc6ca0fe2e0e414c32033a378ff5d8879f209b1df30e824d6779403826",
+		"slackingfred",
+		"dtt-game-large",
 		repl.PredictionInput{
 			"image":  "http://4.205.58.200/api/v1/files/test/somefile.jpg",
-			"prompt": "a person wearing Mickey",
+			"prompt": "a person wearing Minnie Mouse",
 		},
 		nil,   // We'll just use Wait() even if webhook is better for a backend solution
 		false, // Streaming not supported by this model
@@ -40,13 +42,15 @@ func main() {
 	for predFinish != nil || predError != nil {
 		select {
 		case pred, ok := <-predFinish:
+			log.Print(mustMarshalJSONString(pred))
 			if !ok {
-				log.Print(pred)
 				predFinish = nil
 			}
 		case err, ok := <-predError:
+			if err != nil {
+				log.Println("ERROR!", err)
+			}
 			if !ok {
-				log.Print(err)
 				predError = nil
 			}
 		}
@@ -55,4 +59,12 @@ func main() {
 		}
 	}
 	log.Print("Prediction complete!")
+}
+
+func mustMarshalJSONString(obj any) string {
+	bts, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	return string(bts)
 }
