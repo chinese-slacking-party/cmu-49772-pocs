@@ -29,10 +29,11 @@ func main() {
 		// naklecha/fashion-ai as of 2023-11-28
 		"4e7916cc6ca0fe2e0e414c32033a378ff5d8879f209b1df30e824d6779403826",
 		repl.PredictionInput{
-			//
+			"image":  "http://4.205.58.200/api/v1/files/test/somefile.jpg",
+			"prompt": "a person wearing Mickey",
 		},
-		nil,  // We'll just use Wait() even if webhook is better for a backend solution
-		true, // Streaming - we're not yet using it but no harm to set the bit
+		nil,   // We'll just use Wait() even if webhook is better for a backend solution
+		false, // Streaming not supported by this model
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -46,17 +47,18 @@ func main() {
 		select {
 		case pred, ok := <-predFinish:
 			if !ok {
-				// TODO here
+				log.Print(pred)
 				predFinish = nil
 			}
 		case err, ok := <-predError:
 			if !ok {
+				log.Print(err)
 				predError = nil
 			}
 		}
-		//if predFinish == nil && predError == nil {
-		//	break
-		//}
+		if predFinish == nil && predError == nil {
+			break
+		}
 	}
 	log.Print("Prediction complete!")
 }
