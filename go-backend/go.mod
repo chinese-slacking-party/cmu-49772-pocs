@@ -3,6 +3,7 @@ module github.com/chinese-slacking-party/cmu-49772-pocs
 go 1.18
 
 require (
+	github.com/aws/aws-lambda-go v1.47.0
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/replicate/replicate-go v0.12.0
 )
