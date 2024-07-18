@@ -1,3 +1,5 @@
+package tech.qianchang.training.cmu.icc49783.mapreduce;
+
 import java.io.IOException;
 import java.util.*;
 import java.lang.Object;
