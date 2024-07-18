@@ -33,9 +33,6 @@ public class WordCount {
     }
 
     public static void main(String[] args) throws Exception {
-        System.setProperty("log4j.configurationFile", "c:\\Users\\bspub\\go\\src\\github.com\\chinese-slacking-party\\cmu-49772-pocs\\java-inclass\\mapreduce001\\src\\main\\resources\\log4j2.xml");
-        System.out.println(System.getProperty("log4j.configurationFile"));
-        System.setProperty("log4j2.debug", "true");
         Configuration conf = new Configuration();
         Job job = new Job(conf, "WordCount");
         job.setJarByClass(WordCount.class);
