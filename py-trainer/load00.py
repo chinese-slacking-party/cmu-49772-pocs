@@ -10,9 +10,13 @@ def loac_SAM40():
 def load_SEED(fname):
     mat_data_seed = sio.loadmat(fname)
     ret = {}
+    first = True
     for key in mat_data_seed.keys():
-        if 'eeg' not in key:
+        if '_eeg' not in key:
             continue
+        if first:
+            print('Subject name:', key[0:key.index('_eeg')])
+            first = False
         ret[key] = pd.DataFrame(mat_data_seed[key]).T
     return ret
 
@@ -30,10 +34,10 @@ def test_subject1():
     print(time_stamps)
 
 
-def test_subject2():
-    data_dict = load_SEED(r'U:\SEED_EEG\Preprocessed_EEG\2_20140404.mat')
+def test_subject15():
+    data_dict = load_SEED(r'U:\SEED_EEG\Preprocessed_EEG\15_20131105.mat')
     print(data_dict.keys())
 
 
 if __name__ == '__main__':
-    print(load_SEED_labels(r'U:\SEED_EEG\Preprocessed_EEG\label.mat'))
+    test_subject15()
