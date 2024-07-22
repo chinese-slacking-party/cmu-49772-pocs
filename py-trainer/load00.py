@@ -19,7 +19,7 @@ def load_SEED(fname):
 
 def load_SEED_labels(fname):
     mat_labels = sio.loadmat(fname)
-    print(mat_labels.keys())
+    return mat_labels['label']
 
 
 def test_subject1():
@@ -36,4 +36,4 @@ def test_subject2():
 
 
 if __name__ == '__main__':
-    test_subject2()
+    print(load_SEED_labels(r'U:\SEED_EEG\Preprocessed_EEG\label.mat'))
