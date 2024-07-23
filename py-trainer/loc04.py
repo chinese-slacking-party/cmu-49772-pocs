@@ -16,5 +16,19 @@ def read_SAM40_coords(fname):
     return results, mapping
 
 
+# Adapted from https://github.com/mkfzdmr/Deep-Learning-based-Emotion-Recognition
+# See https://www.eecs.qmul.ac.uk/mmv/datasets/deap/readme.html "Geneva" for channel mapping
+# We should use this because its values are adapted to the fact that our Azimuth projection assumes
+# a pi/2 (1.571) radius
+def read_DEAP_coords(fname):
+    results = []
+    with open("loc2d.csv") as csvfile:
+        reader = csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC)  # change contents to floats
+        for row in reader:  # each row is a list
+            results.append(np.array(row))
+            # print(row)
+    return np.array(results)
+
+
 if __name__ == '__main__':
-    print(read_SAM40_coords('locs_32.tsv'))
+    print(read_DEAP_coords('loc2d.csv'))

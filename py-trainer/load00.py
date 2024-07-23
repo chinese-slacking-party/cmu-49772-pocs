@@ -62,14 +62,16 @@ def test_subject1():
     time_stamps = pd.date_range(start='2013-10-27', periods=data_frame.shape[0], freq='5ms')
     '''
     According to the Excel file, channel order is:
-    FP1 FPZ FP2 AF3 AF4 F7 F5 F3
-    F1 FZ F2 F4 F6 F8 FT7 FC5
-    FC3 FC1 FCZ FC2 FC4 FC6 FT8 T7
-    C5 C3 C1 CZ C2 C4 C6 T8
-    TP7 CP5 CP3 CP1 CPZ CP2 CP4 CP6
-    TP8 P7 P5 P3 P1 PZ P2 P4
-    P6 P8 PO7 PO5 PO3 POZ PO4 PO6
-    PO8 CB1 O1 OZ O2 CB2
+    (1)FP1 FPZ (17)FP2 (2)AF3 (18)AF4 (4)F7 F5 (3)F3
+    F1 (19)FZ F2 (20)F4 F6 (21)F8 FT7 (5)FC5
+    FC3 (6)FC1 FCZ (23)FC2 FC4 (22)FC6 FT8 (8)T7
+    C5 (7)C3 C1 (24)CZ C2 (25)C4 C6 (26)T8
+    TP7 (9)CP5 CP3 (10)CP1 CPZ (28)CP2 CP4 (27)CP6
+    TP8 (12)P7 P5 (11)P3 P1 (16)PZ P2 (29)P4
+    P6 (30)P8 PO7 PO5 (13)PO3 POZ (31)PO4 PO6
+    PO8 CB1 (14)O1 (15)OZ (32)O2 CB2
+    Numbers in parentheses are 1-based channel mappings to the Geneva device described in the DEAP
+    dataset brief.
     '''
     print(data_frame)
 
