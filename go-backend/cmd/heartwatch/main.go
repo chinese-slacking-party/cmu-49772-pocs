@@ -2,15 +2,29 @@ package main
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
+	configCORS(r)
 	r.GET("/ping", handlePing)
 	r.GET("/api/v1/hbs/report", handleReport)
 	r.Run(":8002")
+}
+
+func configCORS(r *gin.Engine) {
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true, // For debugging - exact domain not known yet
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 }
 
 type HeartRate struct {
