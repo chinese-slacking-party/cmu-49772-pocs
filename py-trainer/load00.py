@@ -27,18 +27,16 @@ def load_SEED_labels(fname):
 
 
 def examine_SEED(fname):
-    '''
-    What, no metadata of any interest is there.
-    ----------------------------------------
-    PS C:\Users\bspub\go\src\github.com\chinese-slacking-party\cmu-49772-pocs\py-trainer> python .\load00.py
-    __header__
-    b'MATLAB 5.0 MAT-file, Platform: PCWIN64, Created on: Fri Nov 08 10:01:03 2013'
-    __version__
-    1.0
-    __globals__
-    []
-    Subject name: zjy
-    '''
+    # What, no metadata of any interest is there.
+    # ----------------------------------------
+    # PS C:\Users\bspub\go\src\github.com\chinese-slacking-party\cmu-49772-pocs\py-trainer> python .\load00.py
+    # __header__
+    # b'MATLAB 5.0 MAT-file, Platform: PCWIN64, Created on: Fri Nov 08 10:01:03 2013'
+    # __version__
+    # 1.0
+    # __globals__
+    # []
+    # Subject name: zjy
     mat_data_seed = sio.loadmat(fname)
     first = True
     for key in mat_data_seed.keys():
@@ -49,6 +47,13 @@ def examine_SEED(fname):
             continue  # This time, we want to see the other keys (metadata)
         print(key)
         print(mat_data_seed[key])
+
+
+def examine_SEED_raw(fname):
+    # ValueError: Unknown mat file type, version 0, 0
+    # TODO: How to read .cnt files
+    cnt_data_seed = sio.loadmat(fname)
+    print(cnt_data_seed.keys())
 
 
 def test_subject1():
@@ -75,4 +80,4 @@ def test_subject15():
 
 
 if __name__ == '__main__':
-    examine_SEED(r'U:\SEED_EEG\Preprocessed_EEG\15_20131016.mat')
+    pass
