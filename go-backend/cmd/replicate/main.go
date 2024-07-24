@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	// Set the OpenAI API key as an environment variable.
+	// Set the Replicate API key as an environment variable.
 	replicateToken := os.Getenv("REPLICATE_API_TOKEN")
 	if replicateToken == "" {
 		log.Fatal("Please set the REPLICATE_API_TOKEN environment variable.")
