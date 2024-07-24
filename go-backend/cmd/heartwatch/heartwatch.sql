@@ -28,6 +28,7 @@ CREATE TABLE `daily_reports` (
   `min_heart_rate` int NOT NULL,
   `max_heart_rate` int NOT NULL,
   `health_prediction` text,
+  `name` varchar(100) NOT NULL DEFAULT 'Anonymous',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -51,7 +52,7 @@ DROP TABLE IF EXISTS `heart_rates`;
 CREATE TABLE `heart_rates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `timestamp` timestamp NOT NULL,
-  `name` text,
+  `name` varchar(100) NOT NULL DEFAULT 'Anonymous',
   `age` int DEFAULT NULL,
   `gender` text,
   `heart_rate` int NOT NULL,
@@ -77,4 +78,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-23 23:30:02
+-- Dump completed on 2024-07-24  1:12:07
