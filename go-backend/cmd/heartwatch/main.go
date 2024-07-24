@@ -60,6 +60,15 @@ const (
 	sqlInsertOne = "INSERT INTO heart_rates (timestamp, name, age, gender, heart_rate) VALUES (?, ?, ?, ?, ?)"
 )
 
+type UploadHRReq struct {
+	// Begin
+	// End
+	Name   string      `json:"name"`
+	Age    int         `json:"age"`
+	Gender string      `json:"gender"`
+	Data   []HeartRate `json:"data"`
+}
+
 type HeartRate struct {
 	Time int64   `json:"time"`
 	Data float64 `json:"data"`
@@ -72,10 +81,22 @@ func handlePing(c *gin.Context) {
 }
 
 func handleUpload(c *gin.Context) {
-	// TODO: Remove this test code.
-	_, err := db.Exec(sqlInsertOne, time.Now(), "Fred", 25, "M", 80)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
+	var (
+		params UploadHRReq
+		err    error
+	)
+	if err = c.ShouldBindJSON(&params); err != nil {
+		log.Println("Error binding JSON:", err)
+		log.Println("Body:", c.Request.Body)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	for _, hr := range params.Data {
+		if _, err = db.Exec(sqlInsertOne, time.Unix(hr.Time, 0), params.Name, params.Age, params.Gender, hr.Data); err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
