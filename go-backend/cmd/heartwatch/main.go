@@ -1,17 +1,46 @@
+// Copyleft 2024 Slacking Fred. All wrongs reserved.
+// My graduation is immiment so I'm making this as easy as possible. This does not reflect my actual
+// coding skills.
+// Speaking of poor code, I did something like this in my job in 2017... I'm not proud of it, but
+// that "main.go-only" service ran for more than a year in production.
+// "This too shall pass"
+
 package main
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+var (
+	db *sql.DB
 )
 
 func main() {
+	var (
+		err error // To ensure usage of global `db`
+	)
+
+	// Not accessible outside our AWS account, so let it pass
+	db, err = sql.Open("mysql", "admin:t9EHsKId3zG2OGKRqrFP@tcp(cmu-49783-db.cleo2ooaa9zc.us-east-1.rds.amazonaws.com)/heart_monitoring")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+
 	r := gin.Default()
 	configCORS(r)
-	r.GET("/ping", handlePing)
+	r.GET("/api/v1/ping", handlePing)
+	r.POST("/api/v1/hbs/raw", handleUpload) // Originally expecting raw timestamped heartbeat data, but changed to 10-second moving average for simplicity
 	r.GET("/api/v1/hbs/report", handleReport)
 	r.Run(":8002")
 }
@@ -27,6 +56,10 @@ func configCORS(r *gin.Engine) {
 	}))
 }
 
+const (
+	sqlInsertOne = "INSERT INTO heart_rates (timestamp, name, age, gender, heart_rate) VALUES (?, ?, ?, ?, ?)"
+)
+
 type HeartRate struct {
 	Time int64   `json:"time"`
 	Data float64 `json:"data"`
@@ -36,6 +69,14 @@ func handlePing(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",
 	})
+}
+
+func handleUpload(c *gin.Context) {
+	// TODO: Remove this test code.
+	_, err := db.Exec(sqlInsertOne, time.Now(), "Fred", 25, "M", 80)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+	}
 }
 
 func handleReport(c *gin.Context) {
