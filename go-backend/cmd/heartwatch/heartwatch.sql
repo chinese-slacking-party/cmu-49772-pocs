@@ -29,6 +29,8 @@ CREATE TABLE `daily_reports` (
   `max_heart_rate` int NOT NULL,
   `health_prediction` text,
   `name` varchar(100) NOT NULL DEFAULT 'Anonymous',
+  `total_dps` int NOT NULL DEFAULT '0',
+  `hr_sum` double NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -57,7 +59,7 @@ CREATE TABLE `heart_rates` (
   `gender` text,
   `heart_rate` double NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +68,7 @@ CREATE TABLE `heart_rates` (
 
 LOCK TABLES `heart_rates` WRITE;
 /*!40000 ALTER TABLE `heart_rates` DISABLE KEYS */;
-INSERT INTO `heart_rates` VALUES (1,'0000-00-00 00:00:00','Fred',25,'M',80),(2,'0000-00-00 00:00:00','Fred',25,'M',80),(3,'0000-00-00 00:00:00','Fred',25,'M',80),(4,'2024-07-24 01:31:06','Fred',25,'M',80),(5,'2024-07-24 01:31:11','Fred',25,'M',80),(6,'0000-00-00 00:00:00','test',0,'',12),(7,'0000-00-00 00:00:00','test',0,'',11.785);
+INSERT INTO `heart_rates` VALUES (1,'0000-00-00 00:00:00','Fred',25,'M',80),(2,'0000-00-00 00:00:00','Fred',25,'M',80),(3,'0000-00-00 00:00:00','Fred',25,'M',80),(4,'2024-07-24 01:31:06','Fred',25,'M',80),(5,'2024-07-24 01:31:11','Fred',25,'M',80),(6,'0000-00-00 00:00:00','test',0,'',12),(7,'0000-00-00 00:00:00','test',0,'',11.785),(8,'1970-01-01 00:16:40','test',0,'',11.785),(9,'1970-01-01 00:16:40','test',0,'',11.785),(10,'1970-01-01 00:33:20','test',0,'',49.783);
 /*!40000 ALTER TABLE `heart_rates` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -79,4 +81,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-24  1:48:06
+-- Dump completed on 2024-07-24  2:14:20

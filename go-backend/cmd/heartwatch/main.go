@@ -10,7 +10,9 @@ package main
 import (
 	"database/sql"
 	"log"
+	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -58,15 +60,23 @@ func configCORS(r *gin.Engine) {
 
 const (
 	sqlInsertOne = "INSERT INTO heart_rates (timestamp, name, age, gender, heart_rate) VALUES (?, ?, ?, ?, ?)"
+	sqlGetReport = "SELECT date, min_heart_rate, max_heart_rate, health_prediction FROM daily_reports WHERE name = ? AND date >= ? AND date < ?"
 )
 
 type UploadHRReq struct {
 	// Begin
 	// End
 	Name   string      `json:"name"`
-	Age    int         `json:"age"`
+	Age    int16       `json:"age"`
 	Gender string      `json:"gender"`
 	Data   []HeartRate `json:"data"`
+}
+
+type GetReportReq struct {
+	Name        string `json:"name"`
+	Begin       int64  `json:"begin"`
+	End         int64  `json:"end"`
+	Granularity int64  `json:"granularity"`
 }
 
 type HeartRate struct {
@@ -101,21 +111,57 @@ func handleUpload(c *gin.Context) {
 }
 
 func handleReport(c *gin.Context) {
+	var (
+		params GetReportReq
+		rows   *sql.Rows
+		err    error
+
+		datStr          string
+		date            time.Time
+		hrHigh, hrLow   int
+		ovrHigh, ovrLow int // Overall values in the report period
+		prediction      string
+		hrData          []HeartRate
+	)
+	if params.Begin, err = strconv.ParseInt(c.Query("begin"), 10, 64); err != nil {
+		log.Println("Error parsing begin:", err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	if params.End, err = strconv.ParseInt(c.Query("end"), 10, 64); err != nil {
+		log.Println("Error parsing end:", err)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	params.Name = c.Query("name")
+
+	if rows, err = db.Query(sqlGetReport, params.Name, time.Unix(params.Begin, 0), time.Unix(params.End, 0)); err != nil {
+		log.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	ovrHigh = math.MinInt
+	ovrLow = math.MaxInt
+	for rows.Next() {
+		if err = rows.Scan(&datStr, &hrLow, &hrHigh, &prediction); err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if date, err = time.Parse("2006-01-02", datStr); err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		ovrHigh = max(ovrHigh, hrHigh)
+		ovrLow = min(ovrLow, hrLow)
+		// TODO: Implement granularity
+		// TODO: Use a better average...
+		hrData = append(hrData, HeartRate{Time: date.Unix(), Data: float64((hrHigh + hrLow) / 2.0)})
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"hr_high": 130,
-		"hr_low":  65,
-		"hr_rest": 75,
-		"hr_data": []HeartRate{
-			{Time: 1600000000, Data: 80},
-			{Time: 1600000010, Data: 85},
-			{Time: 1600000020, Data: 90},
-			{Time: 1600000030, Data: 95},
-			{Time: 1600000040, Data: 100},
-			{Time: 1600000050, Data: 105},
-			{Time: 1600000060, Data: 110},
-			{Time: 1600000070, Data: 115},
-			{Time: 1600000080, Data: 120},
-			{Time: 1600000090, Data: 125},
-		},
+		"hr_high": ovrHigh,
+		"hr_low":  ovrLow,
+		"hr_data": hrData,
 	})
 }
