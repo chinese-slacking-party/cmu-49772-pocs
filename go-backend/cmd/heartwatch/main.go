@@ -60,7 +60,13 @@ func configCORS(r *gin.Engine) {
 
 const (
 	sqlInsertOne = "INSERT INTO heart_rates (timestamp, name, age, gender, heart_rate) VALUES (?, ?, ?, ?, ?)"
-	sqlGetReport = "SELECT date, min_heart_rate, max_heart_rate, health_prediction FROM daily_reports WHERE name = ? AND date >= ? AND date < ?"
+	sqlGetReport = "SELECT date, min_heart_rate, max_heart_rate, health_prediction, total_dps, hr_sum FROM daily_reports WHERE name = ? AND date >= ? AND date < ?"
+
+	//sqlAccumulate = "INSERT INTO daily_reports (date, name, min_heart_rate, max_heart_rate, health_prediction) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE min_heart_rate = min(min_heart_rate, VALUES(min_heart_rate)), max_heart_rate = max(max_heart_rate, VALUES(max_heart_rate)), health_prediction = VALUES(health_prediction)"
+
+	sqlCreateReport = "INSERT INTO daily_reports (date, name, min_heart_rate, max_heart_rate, health_prediction) VALUES (?, ?, 32767, 0, 'Unknown') ON DUPLICATE KEY UPDATE id=id"
+	sqlUpdateMaxMin = "UPDATE daily_reports SET min_heart_rate = LEAST(min_heart_rate, ?), max_heart_rate = GREATEST(max_heart_rate, ?) WHERE name = ? AND date = ?"
+	sqlAccumHRData  = "UPDATE daily_reports SET total_dps=total_dps+1, hr_sum=hr_sum+? WHERE name = ? AND date = ?"
 )
 
 type UploadHRReq struct {
@@ -107,6 +113,21 @@ func handleUpload(c *gin.Context) {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
+		if _, err = db.Exec(sqlCreateReport, time.Unix(hr.Time, 0).Format("2006-01-02"), params.Name); err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if _, err = db.Exec(sqlUpdateMaxMin, hr.Data, hr.Data, params.Name, time.Unix(hr.Time, 0).Format("2006-01-02")); err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if _, err = db.Exec(sqlAccumHRData, hr.Data, params.Name, time.Unix(hr.Time, 0).Format("2006-01-02")); err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
@@ -120,6 +141,7 @@ func handleReport(c *gin.Context) {
 		date            time.Time
 		hrHigh, hrLow   int
 		ovrHigh, ovrLow int // Overall values in the report period
+		dpCount, hrSum  float64
 		prediction      string
 		hrData          []HeartRate
 	)
@@ -143,7 +165,7 @@ func handleReport(c *gin.Context) {
 	ovrHigh = math.MinInt
 	ovrLow = math.MaxInt
 	for rows.Next() {
-		if err = rows.Scan(&datStr, &hrLow, &hrHigh, &prediction); err != nil {
+		if err = rows.Scan(&datStr, &hrLow, &hrHigh, &prediction, &dpCount, &hrSum); err != nil {
 			log.Println(err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
@@ -157,11 +179,12 @@ func handleReport(c *gin.Context) {
 		ovrLow = min(ovrLow, hrLow)
 		// TODO: Implement granularity
 		// TODO: Use a better average...
-		hrData = append(hrData, HeartRate{Time: date.Unix(), Data: float64((hrHigh + hrLow) / 2.0)})
+		hrData = append(hrData, HeartRate{Time: date.Unix(), Data: hrSum / dpCount})
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"hr_high": ovrHigh,
-		"hr_low":  ovrLow,
-		"hr_data": hrData,
+		"hr_high":    ovrHigh,
+		"hr_low":     ovrLow,
+		"hr_data":    hrData,
+		"prediction": prediction,
 	})
 }
