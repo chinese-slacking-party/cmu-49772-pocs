@@ -132,6 +132,11 @@ func handleUpload(c *gin.Context) {
 }
 
 func handleReport(c *gin.Context) {
+	const (
+		hrGood = "Healthy"
+		hrOkay = "Caution"
+		hrBad  = "Dangerous"
+	)
 	var (
 		params GetReportReq
 		rows   *sql.Rows
@@ -142,7 +147,7 @@ func handleReport(c *gin.Context) {
 		hrHigh, hrLow   int
 		ovrHigh, ovrLow int // Overall values in the report period
 		dpCount, hrSum  float64
-		prediction      string
+		prediction      string // Not used
 		hrData          []HeartRate
 	)
 	if params.Begin, err = strconv.ParseInt(c.Query("begin"), 10, 64); err != nil {
@@ -178,8 +183,14 @@ func handleReport(c *gin.Context) {
 		ovrHigh = max(ovrHigh, hrHigh)
 		ovrLow = min(ovrLow, hrLow)
 		// TODO: Implement granularity
-		// TODO: Use a better average...
 		hrData = append(hrData, HeartRate{Time: date.Unix(), Data: hrSum / dpCount})
+	}
+	if ovrHigh >= 180 {
+		prediction = hrBad
+	} else if ovrHigh >= 160 {
+		prediction = hrOkay
+	} else {
+		prediction = hrGood
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"hr_high":    ovrHigh,
