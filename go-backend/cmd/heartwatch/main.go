@@ -9,19 +9,24 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"io"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-resty/resty/v2"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	db *sql.DB
+	db     *sql.DB
+	client = resty.New()
 )
 
 func main() {
@@ -103,7 +108,8 @@ func handleUpload(c *gin.Context) {
 	)
 	if err = c.ShouldBindJSON(&params); err != nil {
 		log.Println("Error binding JSON:", err)
-		log.Println("Body:", c.Request.Body)
+		bts, _ := io.ReadAll(c.Request.Body)
+		log.Println("Body:", string(bts))
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -127,6 +133,17 @@ func handleUpload(c *gin.Context) {
 			log.Println(err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
+		}
+
+		if hr.Data >= 180 {
+			req := client.R().SetBody(map[string]interface{}{
+				"msg_id":      rand.Int63(),
+				"content":     fmt.Sprintf("Heart rate too high at %.2f", hr.Data),
+				"dismissable": "no",
+			})
+
+			resp, err := req.Post("http://100.28.74.221:5000/upsert")
+			log.Println("HR alert", string(resp.Body()), err)
 		}
 	}
 }
