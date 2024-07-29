@@ -30,41 +30,22 @@ def read_DEAP_coords(fname):
     return np.array(results)
 
 
-geneva_seq = [
-    'Fp1',
-    'AF3',
-    'F3',
-    'F7',
-    'FC5',
-    'FC1',
-    'C3',
-    'T7',
-    'CP5',
-    'CP1',
-    'P3',
-    'P7',
-    'PO3',
-    'O1',
-    'Oz',
-    'Pz',
-    'Fp2',
-    'AF4',
-    'Fz',
-    'F4',
-    'F8',
-    'FC6',
-    'FC2',
-    'Cz',
-    'C4',
-    'T8',
-    'CP6',
-    'CP2',
-    'P4',
-    'P8',
-    'PO4',
-    'O2',
+GENEVA_SEQ = [
+    'Fp1',    'AF3',    'F3',    'F7',    'FC5',    'FC1',    'C3',    'T7',
+    'CP5',    'CP1',    'P3',    'P7',    'PO3',    'O1',    'Oz',    'Pz',
+    'Fp2',    'AF4',    'Fz',    'F4',    'F8',    'FC6',    'FC2',    'Cz',
+    'C4',    'T8',    'CP6',    'CP2',    'P4',    'P8',    'PO4',    'O2',
+]
+
+
+GENEVA_TO_SEED = [
+    0,    3,    7,    5,    15,    17,    25,    23,
+    33,    35,    43,    41,    52,    58,    59,    45,
+    2,    4,    9,    11,    13,    21,    19,    27,
+    29,    31,    39,    37,    47,    49,    54,    60,
 ]
 
 
 if __name__ == '__main__':
-    print(read_DEAP_coords('loc2d.csv'))
+    geneva = read_DEAP_coords('loc2d.csv')
+    print(geneva, len(geneva))
