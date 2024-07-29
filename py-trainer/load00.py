@@ -1,10 +1,33 @@
 #!/usr/bin/env python3
+import glob
+import logging
+import os.path
 import pandas as pd
+import random
 import scipy.io as sio
 
 
-def loac_SAM40():
-    pass
+class SEEDLoader:
+    def __init__(self, fname):
+        self.mat_data_seed = sio.loadmat(fname)
+        self.data_dict = {}
+        self.count = 0
+        first = True
+        for key in self.mat_data_seed.keys():
+            if '_eeg' not in key:
+                continue
+            if first:
+                self.subject_name = key[0:key.index('_eeg')]
+                logging.debug('Subject name:', self.subject_name)
+                first = False
+            self.data_dict[int(key[key.index('_eeg')+4:]) - 1] = pd.DataFrame(self.mat_data_seed[key]).T
+            self.count += 1
+    
+    def __len__(self):
+        return self.count
+    
+    def __getitem__(self, key):
+        return self.data_dict[key]
 
 
 def load_SEED(fname):
@@ -56,8 +79,13 @@ def examine_SEED_raw(fname):
     print(cnt_data_seed.keys())
 
 
+SEED_DIR_FRED_LAPTOP = r'C:\Users\bspub\Desktop\Temp\SEED-III\Preprocessed_EEG'
+FILE_SUB01_EXPR1 = os.path.join(SEED_DIR_FRED_LAPTOP, '1_20131027.mat')
+FILE_SUB15_EXPR3 = os.path.join(SEED_DIR_FRED_LAPTOP, '15_20131105.mat')
+
+
 def test_subject1():
-    data_dict = load_SEED(r'U:\SEED_EEG\Preprocessed_EEG\1_20131027.mat')
+    data_dict = load_SEED(FILE_SUB01_EXPR1)
     data_frame = data_dict['djc_eeg1']
     time_stamps = pd.date_range(start='2013-10-27', periods=data_frame.shape[0], freq='5ms')
     '''
@@ -77,9 +105,15 @@ def test_subject1():
 
 
 def test_subject15():
-    data_dict = load_SEED(r'U:\SEED_EEG\Preprocessed_EEG\15_20131105.mat')
+    data_dict = load_SEED(FILE_SUB15_EXPR3)
     print(data_dict.keys())
 
 
 if __name__ == '__main__':
-    pass
+    for file in glob.glob(os.path.join(SEED_DIR_FRED_LAPTOP, '*_*.mat')):
+        print()
+        print(file)
+        ldr = SEEDLoader(file)
+        testcase = random.randint(0, len(ldr) - 1)
+        print(ldr.subject_name, testcase, '/', len(ldr))
+        print(testcase, ldr[testcase])
