@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import numpy as np
 
+from config import *
+
 
 # Adapted from https://github.com/phamhoai366/EEG-signal-analysis-for-stress-studies/blob/main/SEED_IV.ipynb
 # Will become useful if we implement overlapping windows
@@ -14,7 +16,7 @@ def make_steps(samples, frame_duration, overlap):
     out: list of tuple ranges
     '''
 
-    Fs = 200  # 200 Hz
+    Fs = SAMPLE_RATE
     i = 0
     intervals = []
     samples_per_frame = Fs * frame_duration
