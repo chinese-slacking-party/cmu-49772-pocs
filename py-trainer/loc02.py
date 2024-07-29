@@ -48,4 +48,8 @@ GENEVA_TO_SEED = [
 
 if __name__ == '__main__':
     geneva = read_DEAP_coords('loc2d.csv')
-    print(geneva, len(geneva))
+    seed_coords = {}
+    for i in range(len(GENEVA_SEQ)):
+        seed_coords[GENEVA_TO_SEED[i]] = geneva[i]
+    for i in sorted(seed_coords):
+        print(i, seed_coords[i])
