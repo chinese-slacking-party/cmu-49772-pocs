@@ -16,7 +16,6 @@ def read_SAM40_coords(fname):
     return results, mapping
 
 
-# Adapted from https://github.com/mkfzdmr/Deep-Learning-based-Emotion-Recognition
 # See https://www.eecs.qmul.ac.uk/mmv/datasets/deap/readme.html "Geneva" for channel mapping
 # We should use this because its values are adapted to the fact that our Azimuth projection assumes
 # a pi/2 (1.571) radius
