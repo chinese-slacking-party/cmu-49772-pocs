@@ -28,6 +28,9 @@ class SEEDLoader:
     
     def __getitem__(self, key):
         return self.data_dict[key]
+    
+    def __iter__(self):
+        return iter(self.data_dict)
 
 
 def load_SEED(fname):
@@ -105,11 +108,14 @@ def test_subject1():
 
 
 def test_subject15():
-    data_dict = load_SEED(FILE_SUB15_EXPR3)
-    print(data_dict.keys())
+    ldr = SEEDLoader(FILE_SUB15_EXPR3)
+    for i in ldr:
+        print()
+        print(i)
+        print(ldr[i])
 
 
-if __name__ == '__main__':
+def test_list_like_loader():
     for file in glob.glob(os.path.join(SEED_DIR_FRED_LAPTOP, '*_*.mat')):
         print()
         print(file)
@@ -117,3 +123,7 @@ if __name__ == '__main__':
         testcase = random.randint(0, len(ldr) - 1)
         print(ldr.subject_name, testcase, '/', len(ldr))
         print(testcase, ldr[testcase])
+
+
+if __name__ == '__main__':
+    test_subject15()
