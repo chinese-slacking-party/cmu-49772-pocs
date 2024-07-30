@@ -21,7 +21,7 @@ def make_steps(samples, frame_duration, overlap):
     intervals = []
     samples_per_frame = Fs * frame_duration
     while i+samples_per_frame <= samples:
-        intervals.append((i,i+samples_per_frame))
+        intervals.append((int(i), int(i+samples_per_frame)))
         i = i + samples_per_frame - int(samples_per_frame*overlap)
     return intervals
 

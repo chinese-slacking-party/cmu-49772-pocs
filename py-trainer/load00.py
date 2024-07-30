@@ -6,6 +6,10 @@ import pandas as pd
 import random
 import scipy.io as sio
 
+from config import *
+
+from frame03 import make_steps
+
 
 class SEEDLoader:
     def __init__(self, fname):
@@ -31,6 +35,14 @@ class SEEDLoader:
     
     def __iter__(self):
         return iter(self.data_dict)
+    
+    def raw_frames(self, key):
+        data_frame = self.data_dict[key]
+        steps = make_steps(len(data_frame), FRAME_DURATION, OVERLAP)
+        ret = []
+        for start, end in steps:
+            ret.append(data_frame.iloc[start:end])
+        return ret
 
 
 def load_SEED(fname):
@@ -112,7 +124,8 @@ def test_subject15():
     for i in ldr:
         print()
         print(i)
-        print(ldr[i])
+        rf = ldr.raw_frames(i)
+        print(rf, len(rf))
 
 
 def test_list_like_loader():
