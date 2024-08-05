@@ -95,8 +95,9 @@ def examine_SEED_raw(fname):
 
 
 SEED_DIR_FRED_LAPTOP = r'C:\Users\bspub\Desktop\Temp\SEED-III\Preprocessed_EEG'
+SEED_DIR_CLOUD = r'/content/Preprocessed_EEG'
 FILE_SUB01_EXPR1 = os.path.join(SEED_DIR_FRED_LAPTOP, '1_20131027.mat')
-FILE_SUB15_EXPR3 = os.path.join(SEED_DIR_FRED_LAPTOP, '15_20131105.mat')
+FILE_SUB15_EXPR3 = os.path.join(SEED_DIR_CLOUD, '15_20131105.mat')
 
 
 def test_subject1():
